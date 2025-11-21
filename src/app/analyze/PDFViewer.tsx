@@ -11,9 +11,16 @@ interface PDFViewerProps {
 
 export default function PDFViewer({ onHeights }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
+    setError(null);
+  }
+
+  function onDocumentLoadError(error: Error) {
+    console.error('Error loading PDF:', error);
+    setError('Failed to load PDF. Please upload a PDF file.');
   }
 
   function onPageLoadSuccess(pageNumber: number) {
@@ -36,8 +43,30 @@ export default function PDFViewer({ onHeights }: PDFViewerProps) {
     }
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        <div className="text-center">
+          <p className="mb-4">{error}</p>
+          <a href="/upload" className="text-blue-400 hover:text-blue-300">
+            Upload PDF
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Document file="/sample.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+    <Document
+      file="/sample.pdf"
+      onLoadSuccess={onDocumentLoadSuccess}
+      onLoadError={onDocumentLoadError}
+      loading={
+        <div className="flex items-center justify-center h-full text-gray-400">
+          Loading PDF...
+        </div>
+      }
+    >
       {Array.from(new Array(numPages), (el, index) => (
         <Page
           key={`page_${index + 1}`}
