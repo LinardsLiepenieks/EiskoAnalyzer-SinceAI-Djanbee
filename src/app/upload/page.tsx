@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePDF } from '@/contexts/PDFContext';
 
 export default function Upload() {
   const router = useRouter();
+  const { uploadPDF } = usePDF();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -23,12 +25,15 @@ export default function Upload() {
     if (!file) return;
 
     setUploading(true);
-    // TODO: Implement actual upload logic
-    // For now, just simulate upload and redirect
-    setTimeout(() => {
-      setUploading(false);
+    try {
+      await uploadPDF(file);
       router.push('/analyze');
-    }, 1000);
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      alert('Failed to upload PDF');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
