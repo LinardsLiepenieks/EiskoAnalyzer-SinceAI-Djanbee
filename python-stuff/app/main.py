@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import uuid
 import base64
+import pdfplumber
 from typing import List
 from pydantic import BaseModel
 
@@ -132,7 +133,7 @@ async def health():
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     """
-    Upload a PDF file and return it back to the user.
+    Upload a PDF file and return it as base64 for frontend display.
     """
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
@@ -148,14 +149,15 @@ async def upload_pdf(file: UploadFile = File(...)):
     finally:
         await file.close()
 
-    # Return the PDF back to the user
-    return Response(
-        content=pdf_content,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{file.filename}"'
-        }
-    )
+    # Convert to base64 data URL for frontend
+    pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+    data_url = f"data:application/pdf;base64,{pdf_base64}"
+
+    return JSONResponse({
+        "status": "success",
+        "filename": file.filename,
+        "pdf": data_url
+    })
 
 
 @app.post("/upload/async")
