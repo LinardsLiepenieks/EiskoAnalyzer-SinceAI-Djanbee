@@ -40,29 +40,23 @@ const ExtractionDataContext = createContext<
 >(undefined);
 
 export function ExtractionDataProvider({ children }: { children: ReactNode }) {
-  const [extractionData, setExtractionData] = useState<PageExtractionData>({
-    // Dummy data for development
-    0: [
-      {
-        icons: ['TULPPAVAROKE_3'],
-        nro: '12',
-        kuvateksti: 'Aurinkovoimalat',
-        suoja: 'C25',
-      },
-      {
-        icons: ['TULPPAVAROKE_3'],
-        nro: '13',
-        kuvateksti: 'Varalla',
-        suoja: 'C16',
-      },
-      {
-        icons: ['JOHDONSUOJA_1'],
-        nro: '14',
-        kuvateksti: 'Varalla',
-        suoja: 'C16',
-      },
-    ],
-  });
+  // Initialize from localStorage if available, otherwise empty
+  const getInitialData = (): PageExtractionData => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('extractedPageData');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error('Failed to parse stored extraction data:', e);
+        }
+      }
+    }
+    return {};
+  };
+
+  const [extractionData, setExtractionData] =
+    useState<PageExtractionData>(getInitialData);
 
   const updatePageData = useCallback(
     (pageIndex: number, rowData: ExtractionRowData[]) => {

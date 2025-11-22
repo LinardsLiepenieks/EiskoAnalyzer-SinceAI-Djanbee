@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import PDFSidebar from './PDFSidebar';
 import AnalysisCanvas from './AnalysisCanvas';
@@ -10,6 +10,14 @@ export default function Analyze() {
   const [heights, setHeights] = useState<number[]>([]);
   const [isPdfVisible, setIsPdfVisible] = useState(true);
   const { extractionData } = useExtractionData();
+
+  useEffect(() => {
+    console.log('📊 Analyze page - Extraction data loaded:', extractionData);
+    console.log('📄 Number of pages:', Object.keys(extractionData).length);
+    Object.entries(extractionData).forEach(([pageIndex, rows]) => {
+      console.log(`   Page ${Number(pageIndex) + 1}: ${rows.length} rows`);
+    });
+  }, [extractionData]);
 
   return (
     <div className="flex flex-col min-h-screen max-w-[1920px] mx-auto">

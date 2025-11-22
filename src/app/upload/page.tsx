@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePDF } from '@/contexts/PDFContext';
+import { useExtractionData } from '@/contexts/ExtractionDataContext';
 
 export default function Upload() {
   const router = useRouter();
   const { uploadPDF, uploadStatus, uploadError } = usePDF();
+  const { setExtractionData } = useExtractionData();
   const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,7 +26,7 @@ export default function Upload() {
     if (!file) return;
 
     try {
-      await uploadPDF(file);
+      await uploadPDF(file, setExtractionData);
       router.push('/analyze');
     } catch (error) {
       console.error('Error uploading PDF:', error);
