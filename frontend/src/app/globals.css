@@ -1,26 +1,57 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Theme CSS variables used by both CSS and Tailwind.
+   Colors:
+   - Djanbee yellow: #FFBB27
+   - Background:    #201B1D
+   - Foreground:    #FDFDFD
+   
+   In v4, colors defined in @theme are automatically available as utilities.
+   Use them like: bg-djanbee, text-background, border-foreground
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
+  --color-djanbee: #ffbb27;
+  --color-background: #201b1d;
+  --color-foreground: #fdfdfd;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* Additional CSS variables for use in custom CSS */
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+}
+
 @media (prefers-color-scheme: dark) {
+  /* Keep the same theme (these colors are dark-mode first). 
+     For a light theme, override the @theme variables here. */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-djanbee: #ffbb27;
+    --color-background: #201b1d;
+    --color-foreground: #fdfdfd;
+    /* RGB version used for subtle gradients */
+    --color-djanbee-rgb: 255, 187, 39;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Subtle radial accent for elements using the background color utility.
+   This adds a faint Djanbee-tinted glow at the top-right without changing
+   the base background color. Keep opacity low so it's barely visible. */
+.bg-background {
+  background-image: radial-gradient(
+    circle at 95% 5%,
+    rgba(var(--color-djanbee-rgb), 0.06) 0%,
+    rgba(var(--color-djanbee-rgb), 0.02) 20%,
+    transparent 40%
+  );
+  background-repeat: no-repeat;
 }
