@@ -1,13 +1,46 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { getSummaryData } from './dummyData';
 import SummaryTable from './SummaryTable';
 import ProtectionBreakdown from './ProtectionBreakdown';
 import ExportButton from './ExportButton';
+import { useExtractionData } from '@/contexts/ExtractionDataContext';
+import { useSummaryData } from '@/hooks/useSummaryData';
+import { getSymbolById } from '@/models/symbols';
 
 export default function SummaryPage() {
   const { devices, aggregated, byProtection, totalCount } = getSummaryData();
+  const { extractionData } = useExtractionData();
+  const {
+    allDevices,
+    totalCount: actualTotalCount,
+    aggregatedItems,
+    uniqueTypes,
+    aggregatedByProtection,
+    uniqueProtections,
+  } = useSummaryData();
+
+  useEffect(() => {
+    console.log('Summary Page - Extraction Data:', extractionData);
+    console.log('Processed Summary:', {
+      totalDevices: actualTotalCount,
+      uniqueTypes,
+      uniqueProtections,
+      aggregatedItems,
+      aggregatedByProtection,
+      allDevices,
+    });
+  }, [
+    extractionData,
+    actualTotalCount,
+    uniqueTypes,
+    uniqueProtections,
+    aggregatedItems,
+    aggregatedByProtection,
+    allDevices,
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -52,13 +85,19 @@ export default function SummaryPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gray-800 rounded-lg p-6">
-            <div className="text-sm font-medium text-gray-400">Total Devices</div>
-            <div className="mt-2 text-3xl font-bold text-white">{totalCount}</div>
+            <div className="text-sm font-medium text-gray-400">
+              Total Devices
+            </div>
+            <div className="mt-2 text-3xl font-bold text-white">
+              {actualTotalCount}
+            </div>
           </div>
           <div className="bg-gray-800 rounded-lg p-6">
-            <div className="text-sm font-medium text-gray-400">Unique Types</div>
+            <div className="text-sm font-medium text-gray-400">
+              Unique Types
+            </div>
             <div className="mt-2 text-3xl font-bold text-white">
-              {aggregated.length}
+              {uniqueTypes}
             </div>
           </div>
           <div className="bg-gray-800 rounded-lg p-6">
@@ -66,7 +105,7 @@ export default function SummaryPage() {
               Protection Values
             </div>
             <div className="mt-2 text-3xl font-bold text-white">
-              {byProtection.length}
+              {uniqueProtections}
             </div>
           </div>
         </div>
@@ -75,12 +114,18 @@ export default function SummaryPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Summary Table - Takes 2 columns */}
           <div className="lg:col-span-2">
-            <SummaryTable data={aggregated} totalCount={totalCount} />
+            <SummaryTable
+              data={aggregatedItems}
+              totalCount={actualTotalCount}
+            />
           </div>
 
           {/* Protection Breakdown - Takes 1 column */}
           <div className="lg:col-span-1">
-            <ProtectionBreakdown data={byProtection} />
+            <ProtectionBreakdown
+              data={aggregatedByProtection}
+              totalCount={actualTotalCount}
+            />
           </div>
         </div>
 
@@ -97,7 +142,7 @@ export default function SummaryPage() {
                 </p>
               </div>
               <span className="text-sm text-gray-400">
-                {devices.length} rows
+                {allDevices.length} rows
               </span>
             </div>
 
@@ -109,7 +154,7 @@ export default function SummaryPage() {
                       Page
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
-                      Symbol
+                      Icons
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
                       NRo
@@ -126,7 +171,7 @@ export default function SummaryPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {devices.map((device) => (
+                  {allDevices.map((device) => (
                     <tr
                       key={device.id}
                       className="hover:bg-gray-750 transition-colors"
@@ -135,15 +180,22 @@ export default function SummaryPage() {
                         {device.pageNumber}
                       </td>
                       <td className="px-4 py-2">
-                        <div className="w-6 h-6 bg-gray-700 rounded flex items-center justify-center">
-                          <img
-                            src={device.symbol}
-                            alt=""
-                            className="w-5 h-5 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
+                        <div className="flex items-center gap-1">
+                          {device.icons.map((iconId, idx) => {
+                            const symbol = getSymbolById(iconId);
+                            return symbol ? (
+                              <div
+                                key={idx}
+                                className="w-6 h-6 bg-gray-700 rounded flex items-center justify-center"
+                              >
+                                <img
+                                  src={`/el_icons/${symbol.iconFileName}`}
+                                  alt={symbol.name}
+                                  className="w-5 h-5 object-contain"
+                                />
+                              </div>
+                            ) : null;
+                          })}
                         </div>
                       </td>
                       <td className="px-4 py-2 text-sm text-white font-mono">

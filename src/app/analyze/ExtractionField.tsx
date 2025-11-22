@@ -4,17 +4,88 @@ import { useState, Fragment } from 'react';
 import Image from 'next/image';
 import IconManagementModal from './IconManagementModal';
 import { getSymbolById, getSymbolIconPath } from '@/models/symbols';
+import { useExtractionData } from '@/contexts/ExtractionDataContext';
 
 interface ExtractionFieldProps {
   pageIndex: number;
+  rowIndex: number;
+  initialData?: {
+    icons?: string[];
+    nro?: string;
+    kuvateksti?: string;
+    suoja?: string;
+    kaapeli?: string;
+  };
 }
 
-export default function ExtractionField({ pageIndex }: ExtractionFieldProps) {
+export default function ExtractionField({
+  pageIndex,
+  rowIndex,
+  initialData,
+}: ExtractionFieldProps) {
+  const { updateRowData } = useExtractionData();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
+  const [selectedIcons, setSelectedIcons] = useState<string[]>(
+    initialData?.icons || []
+  );
+  const [nro, setNro] = useState(initialData?.nro || '');
+  const [kuvateksti, setKuvateksti] = useState(initialData?.kuvateksti || '');
+  const [suoja, setSuoja] = useState(initialData?.suoja || '');
+  const [kaapeli, setKaapeli] = useState(initialData?.kaapeli || '');
 
   const handleIconsSelect = (iconIds: string[]) => {
     setSelectedIcons(iconIds);
+    updateRowData(pageIndex, rowIndex, {
+      icons: iconIds,
+      nro,
+      kuvateksti,
+      suoja,
+      kaapeli,
+    });
+  };
+
+  const handleNroChange = (value: string) => {
+    setNro(value);
+    updateRowData(pageIndex, rowIndex, {
+      icons: selectedIcons,
+      nro: value,
+      kuvateksti,
+      suoja,
+      kaapeli,
+    });
+  };
+
+  const handleKuvatekstiChange = (value: string) => {
+    setKuvateksti(value);
+    updateRowData(pageIndex, rowIndex, {
+      icons: selectedIcons,
+      nro,
+      kuvateksti: value,
+      suoja,
+      kaapeli,
+    });
+  };
+
+  const handleSuojaChange = (value: string) => {
+    setSuoja(value);
+    updateRowData(pageIndex, rowIndex, {
+      icons: selectedIcons,
+      nro,
+      kuvateksti,
+      suoja: value,
+      kaapeli,
+    });
+  };
+
+  const handleKaapeliChange = (value: string) => {
+    setKaapeli(value);
+    updateRowData(pageIndex, rowIndex, {
+      icons: selectedIcons,
+      nro,
+      kuvateksti,
+      suoja,
+      kaapeli: value,
+    });
   };
 
   return (
@@ -57,6 +128,8 @@ export default function ExtractionField({ pageIndex }: ExtractionFieldProps) {
           <input
             type="text"
             maxLength={4}
+            value={nro}
+            onChange={(e) => handleNroChange(e.target.value)}
             className="w-16 text-sm px-2 py-1 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200 placeholder-gray-400"
             placeholder="####"
           />
@@ -66,6 +139,8 @@ export default function ExtractionField({ pageIndex }: ExtractionFieldProps) {
         <div className="flex items-center gap-2 flex-shrink-0">
           <input
             type="text"
+            value={kuvateksti}
+            onChange={(e) => handleKuvatekstiChange(e.target.value)}
             className="w-64 text-sm px-2 py-1 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200 placeholder-gray-400"
             placeholder="Enter description..."
           />
@@ -76,6 +151,8 @@ export default function ExtractionField({ pageIndex }: ExtractionFieldProps) {
           <input
             type="text"
             maxLength={6}
+            value={suoja}
+            onChange={(e) => handleSuojaChange(e.target.value)}
             className="w-20 text-sm px-2 py-1 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200 placeholder-gray-400"
             placeholder="######"
           />
@@ -86,6 +163,8 @@ export default function ExtractionField({ pageIndex }: ExtractionFieldProps) {
           <input
             type="text"
             maxLength={14}
+            value={kaapeli}
+            onChange={(e) => handleKaapeliChange(e.target.value)}
             className="w-36 text-sm px-2 py-1 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200 placeholder-gray-400"
             placeholder="##############"
           />

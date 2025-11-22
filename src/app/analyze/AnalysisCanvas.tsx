@@ -2,14 +2,24 @@
 
 import PageAnalysisPanel from './PageAnalysisPanel';
 
+interface ExtractionRowData {
+  icons?: string[];
+  nro?: string;
+  kuvateksti?: string;
+  suoja?: string;
+  kaapeli?: string;
+}
+
 interface AnalysisCanvasProps {
   heights: number[];
   isExpanded: boolean;
+  dummyData?: Record<number, ExtractionRowData[]>;
 }
 
 export default function AnalysisCanvas({
   heights,
   isExpanded,
+  dummyData = {},
 }: AnalysisCanvasProps) {
   return (
     <div
@@ -20,7 +30,12 @@ export default function AnalysisCanvas({
       <div className="w-full flex flex-col">
         {heights.length > 0 ? (
           heights.map((height, index) => (
-            <PageAnalysisPanel key={index} pageIndex={index} height={height} />
+            <PageAnalysisPanel
+              key={index}
+              pageIndex={index}
+              height={height}
+              rowData={dummyData[index] || []}
+            />
           ))
         ) : (
           <div className="w-full min-h-screen bg-gray-100 flex items-center justify-center">

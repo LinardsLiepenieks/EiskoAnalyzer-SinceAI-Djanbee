@@ -2,14 +2,24 @@
 
 import ExtractionField from './ExtractionField';
 
+interface ExtractionRowData {
+  icons?: string[];
+  nro?: string;
+  kuvateksti?: string;
+  suoja?: string;
+  kaapeli?: string;
+}
+
 interface PageAnalysisPanelProps {
   pageIndex: number;
   height: number;
+  rowData?: ExtractionRowData[];
 }
 
 export default function PageAnalysisPanel({
   pageIndex,
   height,
+  rowData = [],
 }: PageAnalysisPanelProps) {
   return (
     <div
@@ -57,16 +67,14 @@ export default function PageAnalysisPanel({
         </div>
 
         {/* Data rows */}
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
-        <ExtractionField pageIndex={pageIndex} />
+        {[...Array(10)].map((_, rowIndex) => (
+          <ExtractionField
+            key={`${pageIndex}-${rowIndex}`}
+            pageIndex={pageIndex}
+            rowIndex={rowIndex}
+            initialData={rowData[rowIndex]}
+          />
+        ))}
       </div>
     </div>
   );
