@@ -1,7 +1,7 @@
 # app/main.py
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pathlib import Path
 import shutil
 import uuid
@@ -131,11 +131,10 @@ async def health():
     return {"status": "healthy"}
 
 
-@app.post("/upload", response_model=UploadResponse)
+@app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     """
-    Upload a PDF file and extract device data.
-    Returns extracted data immediately (synchronous processing).
+    Upload a PDF file and return it back to the user.
     """
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
@@ -143,36 +142,21 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
 
-    # Create safe unique filename
-    uid = uuid.uuid4().hex
-    dest = UPLOAD_DIR / f"{uid}_{file.filename}"
-
-    # Save uploaded file to disk
+    # Read the PDF content
     try:
-        with open(dest, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        pdf_content = await file.read()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
     finally:
         await file.close()
 
-    # Process PDF and extract data
-    try:
-        extracted_data = extract_pdf_data(dest)
-    except Exception as e:
-        # Clean up file on error
-        if dest.exists():
-            dest.unlink()
-        raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
-    finally:
-        # Clean up uploaded file after processing
-        if dest.exists():
-            dest.unlink()
-
-    return UploadResponse(
-        status="success",
-        filename=file.filename,
-        data=extracted_data
+    # Return the PDF back to the user
+    return Response(
+        content=pdf_content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{file.filename}"'
+        }
     )
 
 
