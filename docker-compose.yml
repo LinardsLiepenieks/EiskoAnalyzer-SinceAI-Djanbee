@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:10000
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./python-stuff
+      dockerfile: Dockerfile
+    ports:
+      - "10000:10000"
+    environment:
+      - PYTHONUNBUFFERED=1
