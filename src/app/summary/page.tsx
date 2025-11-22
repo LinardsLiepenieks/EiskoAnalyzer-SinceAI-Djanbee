@@ -72,9 +72,10 @@ export default function SummaryPage() {
               </h1>
             </div>
             <ExportButton
-              devices={devices}
-              aggregated={aggregated}
-              byProtection={byProtection}
+              aggregatedItems={aggregatedItems}
+              allDevices={allDevices}
+              aggregatedByProtection={aggregatedByProtection}
+              totalCount={actualTotalCount}
             />
           </div>
         </div>

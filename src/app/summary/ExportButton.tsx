@@ -1,88 +1,163 @@
 'use client';
 
 import * as XLSX from 'xlsx';
-import { DeviceRow, AggregatedDevice, ProtectionSummary } from './types';
+import {
+  AggregatedItem,
+  DeviceRow,
+  AggregatedByProtection,
+} from '@/hooks/useSummaryData';
 
 interface ExportButtonProps {
-  devices: DeviceRow[];
-  aggregated: AggregatedDevice[];
-  byProtection: ProtectionSummary[];
+  aggregatedItems: AggregatedItem[];
+  allDevices: DeviceRow[];
+  aggregatedByProtection: AggregatedByProtection[];
+  totalCount: number;
 }
 
 export default function ExportButton({
-  devices,
-  aggregated,
-  byProtection,
+  aggregatedItems,
+  allDevices,
+  aggregatedByProtection,
+  totalCount,
 }: ExportButtonProps) {
   const handleExport = () => {
     // Create workbook
     const workbook = XLSX.utils.book_new();
 
-    // Sheet 1: All Devices (raw data)
-    const allDevicesData = devices.map(device => ({
-      'Page': device.pageNumber,
-      'Row': device.rowNumber,
-      'NRo': device.nro,
-      'Kuvateksti': device.kuvateksti,
-      'Suoja': device.suoja,
-      'Kaapeli': device.kaapeli,
-      'Symbol': device.symbol,
-    }));
-    const allDevicesSheet = XLSX.utils.json_to_sheet(allDevicesData);
+    // Prepare Summary Section
+    const summaryData: any[] = [];
 
-    // Set column widths for better readability
-    allDevicesSheet['!cols'] = [
-      { wch: 6 },  // Page
-      { wch: 6 },  // Row
-      { wch: 8 },  // NRo
-      { wch: 25 }, // Kuvateksti
-      { wch: 8 },  // Suoja
-      { wch: 15 }, // Kaapeli
-      { wch: 30 }, // Symbol
-    ];
-    XLSX.utils.book_append_sheet(workbook, allDevicesSheet, 'All Devices');
-
-    // Sheet 2: Aggregated Summary
-    const aggregatedData = aggregated.map(item => ({
-      'Kuvateksti': item.kuvateksti,
-      'Suoja': item.suoja,
-      'Kaapeli': item.kaapeli,
-      'Quantity': item.count,
-      'NRo List': item.nros.join(', '),
-    }));
-
-    // Add total row
-    aggregatedData.push({
-      'Kuvateksti': 'TOTAL',
-      'Suoja': '',
-      'Kaapeli': '',
-      'Quantity': devices.length,
-      'NRo List': '',
+    // Header
+    summaryData.push({
+      A: 'DEVICE SUMMARY',
+      B: '',
+      C: '',
+      D: '',
     });
 
-    const aggregatedSheet = XLSX.utils.json_to_sheet(aggregatedData);
-    aggregatedSheet['!cols'] = [
-      { wch: 25 }, // Kuvateksti
-      { wch: 8 },  // Suoja
-      { wch: 15 }, // Kaapeli
-      { wch: 10 }, // Quantity
-      { wch: 40 }, // NRo List
-    ];
-    XLSX.utils.book_append_sheet(workbook, aggregatedSheet, 'Summary');
+    // Column headers
+    summaryData.push({
+      A: 'Type',
+      B: 'Suoja',
+      C: 'Cable Types',
+      D: 'Quantity',
+    });
 
-    // Sheet 3: Protection Breakdown
-    const protectionData = byProtection.map(item => ({
-      'Protection (Suoja)': item.suoja,
-      'Count': item.count,
-      'Percentage': `${item.percentage}%`,
-    }));
-    const protectionSheet = XLSX.utils.json_to_sheet(protectionData);
-    protectionSheet['!cols'] = [
-      { wch: 18 }, // Protection
-      { wch: 10 }, // Count
-      { wch: 12 }, // Percentage
+    // Aggregated items
+    aggregatedItems.forEach((item) => {
+      summaryData.push({
+        A: item.icons.join(' + '),
+        B: item.suoja,
+        C:
+          item.kaapeliTypes.join(', ') +
+          (item.hasCableMismatch ? ' ⚠️ MISMATCH' : ''),
+        D: item.count,
+      });
+    });
+
+    // Total row
+    summaryData.push({
+      A: '',
+      B: '',
+      C: 'TOTAL:',
+      D: totalCount,
+    });
+
+    // Empty row
+    summaryData.push({
+      A: '',
+      B: '',
+      C: '',
+      D: '',
+    });
+
+    // Protection Breakdown Header
+    summaryData.push({
+      A: 'BY PROTECTION VALUE',
+      B: '',
+      C: '',
+      D: '',
+    });
+
+    summaryData.push({
+      A: 'Suoja',
+      B: 'Count',
+      C: 'Percentage',
+      D: '',
+    });
+
+    // Protection breakdown
+    aggregatedByProtection.forEach((item) => {
+      const percentage =
+        totalCount > 0 ? ((item.count / totalCount) * 100).toFixed(1) : '0.0';
+      summaryData.push({
+        A: item.suoja,
+        B: item.count,
+        C: `${percentage}%`,
+        D: '',
+      });
+    });
+
+    // Empty rows for separation
+    summaryData.push({
+      A: '',
+      B: '',
+      C: '',
+      D: '',
+    });
+    summaryData.push({
+      A: '',
+      B: '',
+      C: '',
+      D: '',
+    });
+
+    // All Devices Header
+    summaryData.push({
+      A: 'ALL EXTRACTED DEVICES',
+      B: '',
+      C: '',
+      D: '',
+    });
+
+    summaryData.push({
+      A: 'Page',
+      B: 'Type',
+      C: 'NRo',
+      D: 'Kuvateksti',
+      E: 'Suoja',
+      F: 'Kaapeli',
+    });
+
+    // All devices data
+    allDevices.forEach((device) => {
+      summaryData.push({
+        A: device.pageNumber,
+        B: device.icons.join(' + '),
+        C: device.nro,
+        D: device.kuvateksti,
+        E: device.suoja,
+        F: device.kaapeli,
+      });
+    });
+
+    // Convert to sheet
+    const worksheet = XLSX.utils.json_to_sheet(summaryData, {
+      skipHeader: true,
+    });
+
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 25 }, // A - Icons/Page
+      { wch: 12 }, // B - Suoja/Icons
+      { wch: 20 }, // C - Cable Types/NRo
+      { wch: 30 }, // D - Quantity/Kuvateksti
+      { wch: 10 }, // E - Suoja
+      { wch: 20 }, // F - Kaapeli
     ];
-    XLSX.utils.book_append_sheet(workbook, protectionSheet, 'By Protection');
+
+    // Add the sheet
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Summary Report');
 
     // Generate filename with date
     const date = new Date();
