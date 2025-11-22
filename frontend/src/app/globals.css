@@ -15,7 +15,7 @@
   --color-background: #201b1d;
   --color-foreground: #fdfdfd;
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -40,7 +40,7 @@
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
 }
 
 /* Subtle radial accent for elements using the background color utility.

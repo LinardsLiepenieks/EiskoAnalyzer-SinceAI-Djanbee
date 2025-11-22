@@ -20,13 +20,13 @@ export default function Analyze() {
   }, [extractionData]);
 
   return (
-    <div className=" bg-djanbee/8 ">
+    <div className=" bg-djanbee/8 px-4">
       <div className="  flex flex-col min-h-screen max-w-[1920px] mx-auto">
         <Navbar
           isPdfVisible={isPdfVisible}
           onTogglePdf={() => setIsPdfVisible(!isPdfVisible)}
         />
-        <div className="flex flex-1 overflow-hidden  gap-1">
+        <div className="flex flex-1 overflow-hidden relative gap-4 mt-4">
           <AnalysisCanvas
             heights={heights}
             isExpanded={!isPdfVisible}
