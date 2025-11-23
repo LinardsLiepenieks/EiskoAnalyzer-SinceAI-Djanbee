@@ -49,20 +49,34 @@ function transformExtractionData(apiData: any): PageExtractionData {
 
         symbolsList.forEach((s: string) => {
           const key = String(s || '').trim();
+          // If the extractor appended a trailing -<number> (e.g. SYMBOL-2), remove
+          // that suffix for matching. Only strip when it appears at the end.
+          const strippedKey = key.replace(/-\d+$/, '');
+          if (strippedKey !== key) {
+            console.log(
+              `ℹ️ Stripped trailing index from symbol "${key}" → "${strippedKey}"`
+            );
+          }
           if (!key) return;
 
           // Try matching by human-readable name first, then by apiId.
-          const byName = getSymbolByName(key);
+          const byName = getSymbolByName(strippedKey);
           if (byName) {
             mapped.push(byName.id);
-            console.log(`✓ Mapped symbol "${key}" → "${byName.id}" (by name)`);
+            console.log(
+              `✓ Mapped symbol "${strippedKey}" → "${byName.id}" (by name)`
+            );
             return;
           }
 
-          const byApi = getSymbolByApiId ? getSymbolByApiId(key) : undefined;
+          const byApi = getSymbolByApiId
+            ? getSymbolByApiId(strippedKey)
+            : undefined;
           if (byApi) {
             mapped.push(byApi.id);
-            console.log(`✓ Mapped symbol "${key}" → "${byApi.id}" (by apiId)`);
+            console.log(
+              `✓ Mapped symbol "${strippedKey}" → "${byApi.id}" (by apiId)`
+            );
             return;
           }
 

@@ -22,6 +22,12 @@ export const SYMBOLS: Symbol[] = [
     iconFileName: '3-NAP KONTAKTORI icon.svg',
   },
   {
+    id: 'KONTAKTORI_1',
+    name: '1-NAP KONTAKTORI',
+    apiId: '1_NAP_KONTAKTORI',
+    iconFileName: '1-NAP KONTAKTORI icon.svg',
+  },
+  {
     id: 'KYTKINVAROKE_3',
     name: '3-NAP KYTKINVAROKE KVKE',
     apiId: '3_NAP_KYTKINVAROKE_KVKE',
@@ -49,7 +55,7 @@ export const SYMBOLS: Symbol[] = [
     id: 'CUAI',
     name: 'CUAI',
     apiId: 'CUAI',
-    iconFileName: 'CUAI icon.svg',
+    iconFileName: 'CUAI.svg',
   },
   {
     id: 'JOHDONSUOJA_1',
