@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { PageExtractionData, ExtractionRowData } from './ExtractionDataContext';
-import { getSymbolByName } from '@/models/symbols';
+import { getSymbolByName, getSymbolByApiId } from '@/models/symbols';
 
 interface PDFContextType {
   pdfFile: string | null;
@@ -35,23 +35,42 @@ function transformExtractionData(apiData: any): PageExtractionData {
         kaapeli: row.kaapeli ?? '',
       };
 
-      // The extractor now returns `symbols: ["NAME_OR_APIID"]` (and symbol_scores).
-      // Use the first symbol and match by human-readable name (not apiId) as requested.
+      // The extractor returns `symbols: ["NAME_OR_APIID"]` (and symbol_scores).
+      // Map each returned symbol to an internal `Symbol.id`.
       const symbolsList: string[] =
         row.symbols || row.symbol
           ? Array.isArray(row.symbols)
             ? row.symbols
             : [row.symbol]
           : [];
+
       if (symbolsList.length > 0) {
-        const symbolKey = String(symbolsList[0]);
-        const matched = getSymbolByName(symbolKey);
-        if (matched) {
-          rowData.icons = [matched.id];
-          console.log(`✓ Mapped symbol "${symbolKey}" → "${matched.id}"`);
-        } else {
-          console.warn(`⚠️ Unknown symbol from extractor: "${symbolKey}"`);
-          rowData.icons = [symbolKey];
+        const mapped: string[] = [];
+
+        symbolsList.forEach((s: string) => {
+          const key = String(s || '').trim();
+          if (!key) return;
+
+          // Try matching by human-readable name first, then by apiId.
+          const byName = getSymbolByName(key);
+          if (byName) {
+            mapped.push(byName.id);
+            console.log(`✓ Mapped symbol "${key}" → "${byName.id}" (by name)`);
+            return;
+          }
+
+          const byApi = getSymbolByApiId ? getSymbolByApiId(key) : undefined;
+          if (byApi) {
+            mapped.push(byApi.id);
+            console.log(`✓ Mapped symbol "${key}" → "${byApi.id}" (by apiId)`);
+            return;
+          }
+
+          console.warn(`⚠️ Unknown symbol from extractor: "${key}"`);
+        });
+
+        if (mapped.length > 0) {
+          rowData.icons = mapped;
         }
       }
 
