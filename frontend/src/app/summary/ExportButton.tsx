@@ -120,39 +120,14 @@ export default function ExportButton({
     totalRow[String.fromCharCode(totalCol.charCodeAt(0) + 1)] = totalCount;
     summaryData.push(totalRow);
 
-    // Empty row
+    // Empty row to separate sections
     summaryData.push({});
 
-    // Protection Breakdown Header
-    summaryData.push({
-      A: 'BY PROTECTION VALUE',
-    });
+    // Prepare a separate sheet for ALL EXTRACTED DEVICES
+    const devicesData: any[] = [];
 
-    summaryData.push({
-      A: 'Suoja',
-      B: 'Count',
-      C: 'Percentage',
-    });
-
-    // Protection breakdown
-    aggregatedByProtection.forEach((item) => {
-      const percentage =
-        totalCount > 0 ? ((item.count / totalCount) * 100).toFixed(1) : '0.0';
-      summaryData.push({
-        A: item.suoja,
-        B: item.count,
-        C: `${percentage}%`,
-      });
-    });
-
-    // Empty rows for separation
-    summaryData.push({});
-    summaryData.push({});
-
-    // All Devices Header
-    summaryData.push({
-      A: 'ALL EXTRACTED DEVICES',
-    });
+    // All Devices Header (will go to second sheet)
+    devicesData.push({ A: 'ALL EXTRACTED DEVICES' });
 
     // Column headers for all devices
     const deviceHeaders: any = {
@@ -177,9 +152,9 @@ export default function ExportButton({
       deviceHeaders[deviceCol] = 'Kaapeli';
     }
 
-    summaryData.push(deviceHeaders);
+    devicesData.push(deviceHeaders);
 
-    // All devices data
+    // All devices data (goes to devicesData, not summaryData)
     allDevices.forEach((device) => {
       const { input, output } = parseSuoja(device.suoja);
       const deviceRow: any = {
@@ -204,15 +179,15 @@ export default function ExportButton({
         deviceRow[col] = device.kaapeli;
       }
 
-      summaryData.push(deviceRow);
+      devicesData.push(deviceRow);
     });
 
-    // Convert to sheet
+    // Convert summary to first sheet
     const worksheet = XLSX.utils.json_to_sheet(summaryData, {
       skipHeader: true,
     });
 
-    // Set column widths - adjust based on options
+    // Set column widths - adjust based on options (Summary sheet)
     const colWidths = [
       { wch: 25 }, // A - Icons/Page
       { wch: 12 }, // B - Type/Suoja Input
@@ -235,15 +210,41 @@ export default function ExportButton({
 
     worksheet['!cols'] = colWidths;
 
-    // Add the sheet
+    // Add the summary sheet as first sheet
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Summary Report');
+
+    // Convert devicesData to second sheet
+    const devicesSheet = XLSX.utils.json_to_sheet(devicesData, {
+      skipHeader: true,
+    });
+
+    // Column widths for devices sheet
+    const devCols: any[] = [
+      { wch: 8 }, // Page
+      { wch: 25 }, // Type
+      { wch: 12 }, // NRo
+      { wch: 30 }, // Kuvateksti
+    ];
+    if (!separateInputOutput) {
+      devCols.push({ wch: 12 }); // Suoja
+    } else {
+      devCols.push({ wch: 12 }); // Suoja Input
+      devCols.push({ wch: 12 }); // Suoja Output
+    }
+    if (showCable) {
+      devCols.push({ wch: 20 }); // Kaapeli
+    }
+    devicesSheet['!cols'] = devCols;
+
+    // Add the devices sheet as second sheet
+    XLSX.utils.book_append_sheet(workbook, devicesSheet, 'All Devices');
 
     // Generate filename with date
     const date = new Date();
     const dateStr = date.toISOString().split('T')[0];
     const filename = `device-summary-${dateStr}.xlsx`;
 
-    // Download
+    // Download workbook with two sheets
     XLSX.writeFile(workbook, filename);
   };
 
