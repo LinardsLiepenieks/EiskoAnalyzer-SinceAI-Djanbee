@@ -3,8 +3,21 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background font-sans max-w-[1920px] mx-auto relative">
-      <main className="flex min-h-screen w-full max-w-4xl flex-col items-center py-20 px-16 sm:items-start gap-16">
+    <div className="flex min-h-screen items-center justify-center bg-background font-sans max-w-[1920px] mx-auto relative overflow-hidden">
+      {/* Angled Background Image */}
+      <div className="absolute right-0 top-0 h-full w-[60%] pointer-events-none">
+        <div className="relative h-full w-full origin-top-right transform rotate-[-8deg] translate-x-[10%]">
+          <Image
+            src="/bg/bg-schematic.png"
+            alt="Background schematic"
+            fill
+            className="object-cover opacity-15"
+            priority
+          />
+        </div>
+      </div>
+
+      <main className="flex min-h-screen w-full max-w-4xl flex-col items-center py-20 px-16 sm:items-start gap-16 relative z-10">
         <div className="flex flex-col gap-8">
           <Image
             src="/logos/eisko-logo.svg"
@@ -58,7 +71,7 @@ export default function Home() {
       </main>
 
       {/* Watermark */}
-      <div className="fixed bottom-6 left-6 flex items-center gap-2 opacity-40">
+      <div className="fixed bottom-6 left-6 flex items-center gap-2 opacity-40 z-20">
         <Image
           src="/logos/djanbee-logo.svg"
           alt="Djanbee logo"

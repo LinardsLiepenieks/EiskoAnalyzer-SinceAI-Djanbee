@@ -33,97 +33,143 @@ export default function Upload() {
     }
   };
 
+  const handleDownloadSample = () => {
+    const link = document.createElement('a');
+    link.href = '/sample/5to19eisko.pdf';
+    link.download = '5to19eisko.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const isUploading = uploadStatus === 'uploading';
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 max-w-[1920px] mx-auto">
-      <div className="max-w-md w-full bg-background/50 rounded-lg shadow-xl p-8 border border-foreground/10">
-        <h1 className="text-3xl font-bold text-foreground mb-6 text-center">
-          Upload PDF
-        </h1>
+      <div className="max-w-4xl w-full flex flex-col md:flex-row gap-6">
+        {/* Upload Section */}
+        <div className="flex-1 bg-background/50 rounded-lg shadow-xl p-8 border border-foreground/10">
+          <h1 className="text-3xl font-bold text-foreground mb-6 text-center">
+            Upload PDF
+          </h1>
 
-        <div className="mb-6">
-          <label
-            htmlFor="file-upload"
-            className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-all duration-150 ${
-              isUploading
-                ? 'border-foreground/20 bg-background/30 cursor-not-allowed'
-                : 'border-foreground/20 bg-background/30 hover:border-djanbee/60 hover:bg-djanbee/10 cursor-pointer'
-            }`}
-          >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              {isUploading ? (
-                <p className="text-lg font-semibold text-foreground/70">
-                  Loading...
-                </p>
-              ) : (
-                <>
-                  <svg
-                    className="w-12 h-12 mb-4 text-foreground/40"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  <p className="mb-2 text-sm text-foreground/70">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
+          <div className="mb-6">
+            <label
+              htmlFor="file-upload"
+              className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-all duration-150 ${
+                isUploading
+                  ? 'border-foreground/20 bg-background/30 cursor-not-allowed'
+                  : 'border-foreground/20 bg-background/30 hover:border-djanbee/60 hover:bg-djanbee/10 cursor-pointer'
+              }`}
+            >
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                {isUploading ? (
+                  <p className="text-lg font-semibold text-foreground/70">
+                    Loading...
+                    <br></br>
                   </p>
-                  <p className="text-xs text-foreground/50">PDF files only</p>
-                </>
-              )}
+                ) : (
+                  <>
+                    <svg
+                      className="w-12 h-12 mb-4 text-foreground/40"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    <p className="mb-2 text-sm text-foreground/70">
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
+                    </p>
+                    <p className="text-xs text-foreground/50">PDF files only</p>
+                  </>
+                )}
+              </div>
+              <input
+                id="file-upload"
+                type="file"
+                className="hidden"
+                accept=".pdf"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+            </label>
+          </div>
+
+          {file && (
+            <div className="mb-6 p-4 bg-background/40 rounded-lg border border-foreground/10">
+              <p className="text-sm text-foreground/80">
+                <span className="font-semibold">Selected file:</span>{' '}
+                {file.name}
+              </p>
+              <p className="text-xs text-foreground/60 mt-1">
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
             </div>
-            <input
-              id="file-upload"
-              type="file"
-              className="hidden"
-              accept=".pdf"
-              onChange={handleFileChange}
-              disabled={isUploading}
-            />
-          </label>
+          )}
+
+          {uploadError && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-sm text-red-600">
+                <span className="font-semibold">Error:</span> {uploadError}
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={handleUpload}
+            disabled={!file || isUploading}
+            className="w-full py-3 px-4 bg-djanbee hover:brightness-95 disabled:bg-foreground/20 disabled:cursor-not-allowed text-foreground font-semibold rounded-lg transition-all"
+          >
+            {isUploading ? 'Uploading...' : 'Upload and Analyze'}
+          </button>
+
+          <div className="mt-6 text-center">
+            <a
+              href="/"
+              className="text-sm text-djanbee hover:brightness-90 transition-all"
+            >
+              ← Back to Home
+            </a>
+          </div>
         </div>
 
-        {file && (
-          <div className="mb-6 p-4 bg-background/40 rounded-lg border border-foreground/10">
-            <p className="text-sm text-foreground/80">
-              <span className="font-semibold">Selected file:</span> {file.name}
-            </p>
-            <p className="text-xs text-foreground/60 mt-1">
-              {(file.size / 1024 / 1024).toFixed(2)} MB
-            </p>
-          </div>
-        )}
+        {/* Sample and Information Section */}
+        <div className="flex-1 bg-background/50 rounded-lg shadow-xl p-8 border border-foreground/10">
+          <h2 className="text-2xl font-bold text-foreground mb-6">
+            Sample File
+          </h2>
 
-        {uploadError && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-            <p className="text-sm text-red-600">
-              <span className="font-semibold">Error:</span> {uploadError}
-            </p>
-          </div>
-        )}
-
-        <button
-          onClick={handleUpload}
-          disabled={!file || isUploading}
-          className="w-full py-3 px-4 bg-djanbee hover:brightness-95 disabled:bg-foreground/20 disabled:cursor-not-allowed text-foreground font-semibold rounded-lg transition-all"
-        >
-          {isUploading ? 'Uploading...' : 'Upload and Analyze'}
-        </button>
-
-        <div className="mt-6 text-center">
-          <a
-            href="/"
-            className="text-sm text-djanbee hover:brightness-90 transition-all"
+          <button
+            onClick={handleDownloadSample}
+            className="w-full py-3 px-4 bg-foreground/10 hover:bg-foreground/20 text-foreground font-semibold rounded-lg transition-all mb-6 border border-foreground/20"
           >
-            ← Back to Home
-          </a>
+            Download Sample
+          </button>
+
+          <div className="space-y-4 text-sm text-foreground/70">
+            <p>Test file used to develop the system</p>
+            <p>The system is meant to work with files in this format</p>
+            <p>Table row height changes will affect accuracy</p>
+            <p>
+              System is not meant to work with pdfs in portrait format (for now)
+            </p>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-foreground/10">
+            <blockquote className="italic text-foreground/60 text-sm">
+              "Make it work, make it right, make it fast."
+              <footer className="mt-2 text-xs text-foreground/50">
+                — Kent Beck
+              </footer>
+            </blockquote>
+          </div>
         </div>
       </div>
     </div>

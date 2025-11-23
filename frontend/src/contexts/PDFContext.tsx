@@ -29,7 +29,9 @@ function transformExtractionData(apiData: any): PageExtractionData {
 
     transformed[pageIndex] = (page.rows || []).map((row: any) => {
       const rowData: ExtractionRowData = {
-        nro: String(row.row_index ?? ''),
+        // Prefer `nro` from the extractor if provided (may be text);
+        // otherwise leave empty string (do NOT fall back to `row_index`).
+        nro: row.nro !== undefined && row.nro !== null ? String(row.nro) : '',
         kuvateksti: row.kuvaus ?? row.kuvateksti ?? '',
         suoja: row.suoja ?? '',
         kaapeli: row.kaapeli ?? '',
